@@ -1,0 +1,5 @@
+# Engine files are downloaded by tool/fetch_engine.dart (MPL-2.0), not committed.
+*
+!.gitignore
+!README.md
+!worker/

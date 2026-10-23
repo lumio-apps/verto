@@ -1,0 +1,38 @@
+name: Build language packs
+
+# Run this by hand (Actions tab > Build language packs > Run workflow).
+# It downloads Mozilla's translation models and publishes them on a release
+# called "packs", which the app reads. It is a pre-release, so it never counts
+# as the latest app version.
+on:
+  workflow_dispatch:
+    inputs:
+      languages:
+        description: 'Language codes separated by spaces. Leave empty for all (hi es fr de ru ja ar fa).'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  packs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build packs
+        env:
+          LANGS: ${{ inputs.languages }}
+        run: python3 tool/build_packs.py out $LANGS
+
+      - name: Publish on the packs release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view packs >/dev/null 2>&1 || gh release create packs \
+            --prerelease \
+            --title "Language packs" \
+            --notes "Offline translation models used by the Verto app (Mozilla Firefox Translations, MPL-2.0). The app downloads from here."
+          find out -type f ! -name manifest.json -print0 | xargs -0 gh release upload packs --clobber
+          gh release upload packs out/manifest.json --clobber
