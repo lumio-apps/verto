@@ -99,16 +99,16 @@ class S {
   static const String clearHistoryBody = 'All saved translations are deleted, except favourites.';
   static const String clearEverythingBody = 'All saved translations and favourites are deleted.';
   static const String delete = 'Delete';
-  static String downloadFirst(String name) => 'Download  first';
+  static String downloadFirst(String name) => 'Download $name first';
 
   // Storage and settings
   static const String storageTitle = 'Storage';
-  static String packsUsed(String size, int count) => 'Language packs:  ()';
+  static String packsUsed(String size, int count) => 'Language packs: $size ($count)';
   static const String removeAll = 'Remove all';
   static const String removeAllTitle = 'Remove all language packs?';
   static const String removeAllBody =
       'All downloaded languages are deleted from this phone. Your history and settings stay.';
-  static String updateFiles(String size) => 'Downloaded update files: ';
+  static String updateFiles(String size) => 'Downloaded update files: $size';
   static const String clear = 'Clear';
   static const String settingsTitle = 'Settings';
   static const String clipboardSetting = 'Offer to translate copied text';

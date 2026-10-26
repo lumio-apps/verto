@@ -180,7 +180,7 @@ class _LanguageTile extends StatelessWidget {
     final busy = packs.isBusy(code);
     final hasUpdate = packs.hasUpdate(code);
     final error = packs.errors[code];
-    final native = language.native.isEmpty ? '' : '${language.native} · ';
+    final native = language.native.isEmpty ? '' : '\u2068${language.native}\u2069 · ';
 
     String subtitle;
     if (busy) {
