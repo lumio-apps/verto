@@ -2,9 +2,11 @@ import 'package:flutter/widgets.dart';
 
 import 'core/engine.dart';
 import 'core/engine_server.dart';
+import 'core/history.dart';
 import 'core/pack_controller.dart';
 import 'core/pack_store.dart';
 import 'core/settings_store.dart';
+import 'core/speech.dart';
 import 'core/translation_controller.dart';
 import 'core/update_service.dart';
 
@@ -16,6 +18,8 @@ class Services {
     required this.packs,
     required this.updates,
     required this.translation,
+    required this.history,
+    required this.speech,
   });
 
   final SettingsStore settings;
@@ -23,6 +27,8 @@ class Services {
   final PackController packs;
   final UpdateService updates;
   final TranslationController translation;
+  final HistoryController history;
+  final Speech speech;
 
   static Future<Services> create() async {
     final settings = await SettingsStore.open();
@@ -34,7 +40,13 @@ class Services {
       onInstalledChanged: engine.setPacks,
     );
     final updates = await UpdateService.create();
-    final translation = TranslationController(engine: engine, packs: packs, settings: settings);
+    final history = HistoryController(settings);
+    final translation = TranslationController(
+      engine: engine,
+      packs: packs,
+      settings: settings,
+      history: history,
+    );
     await packs.init();
     // Start in the background; screens show progress.
     engine.start();
@@ -44,6 +56,8 @@ class Services {
       packs: packs,
       updates: updates,
       translation: translation,
+      history: history,
+      speech: Speech(),
     );
   }
 }

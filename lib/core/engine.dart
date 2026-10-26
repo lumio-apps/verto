@@ -168,6 +168,13 @@ class Engine extends ChangeNotifier {
     return r['text'] as String;
   }
 
+  /// Roman ("Hinglish") spelling of Hindi text. Null when the language is not supported.
+  Future<String?> romanize({required String text, required String lang}) async {
+    final r = await _call('romanize', <String, dynamic>{'text': text, 'lang': lang})
+        as Map<String, dynamic>;
+    return r['text'] as String?;
+  }
+
   /// Verify the translation word by word. Returns null when a newer check replaced this one.
   Future<CheckResult?> check({required String from, required String to, required String text}) async {
     final r = await _call(

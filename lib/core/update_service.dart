@@ -163,4 +163,34 @@ class UpdateService extends ChangeNotifier {
   }
 
   void cancelInstall() => _cancel?.cancel();
+
+  Future<List<File>> _downloadedFiles() async {
+    final dir = await getExternalStorageDirectory();
+    if (dir == null || !await dir.exists()) return <File>[];
+    final out = <File>[];
+    await for (final e in dir.list()) {
+      final name = e.uri.pathSegments.last;
+      if (e is File && name.startsWith('verto-') && (name.endsWith('.apk') || name.endsWith('.apk.part'))) {
+        out.add(e);
+      }
+    }
+    return out;
+  }
+
+  /// Space used by update files that were downloaded earlier.
+  Future<int> downloadsSize() async {
+    var sum = 0;
+    for (final f in await _downloadedFiles()) {
+      sum += await f.length();
+    }
+    return sum;
+  }
+
+  Future<void> clearDownloads() async {
+    for (final f in await _downloadedFiles()) {
+      try {
+        await f.delete();
+      } catch (_) {}
+    }
+  }
 }

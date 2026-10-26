@@ -27,7 +27,8 @@ class _VertoAppState extends State<VertoApp> {
         if (services == null) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-            theme: buildTheme(),
+            theme: buildTheme(Brightness.light),
+            darkTheme: buildTheme(Brightness.dark),
             home: Scaffold(
               body: Center(
                 child: snap.hasError
@@ -45,7 +46,8 @@ class _VertoAppState extends State<VertoApp> {
           child: MaterialApp(
             title: S.appName,
             debugShowCheckedModeBanner: false,
-            theme: buildTheme(),
+            theme: buildTheme(Brightness.light),
+            darkTheme: buildTheme(Brightness.dark),
             builder: (context, child) => Stack(
               fit: StackFit.expand,
               children: <Widget>[

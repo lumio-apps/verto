@@ -14,7 +14,7 @@ One language pack gives both directions (English to X and X to English). X to Y 
 
 ## Build and release
 
-1. `pubspec.yaml` `version:` must match the tag you push (tag `v1.0.1` needs `version: 1.0.1+2`).
+1. `pubspec.yaml` `version:` must match the tag you push (tag `v1.1.0` needs `version: 1.1.0+3`).
 2. Push the tag. `.github/workflows/release.yml` fetches the engine, runs analyze and tests, builds the APK, signs it and creates the release.
 
 Repository secrets needed by the release workflow:

@@ -15,8 +15,15 @@ class SettingsStore {
   bool get toEnglish => _prefs.getBool('toEnglish') ?? false;
   Future<void> setToEnglish(bool v) => _prefs.setBool('toEnglish', v);
 
-  List<String> get history => _prefs.getStringList('history') ?? <String>[];
-  Future<void> setHistory(List<String> v) => _prefs.setStringList('history', v);
+  /// Saved translations (history and favourites) as JSON text.
+  String? get itemsJson => _prefs.getString('items');
+  Future<void> setItemsJson(String v) => _prefs.setString('items', v);
+
+  bool get historyEnabled => _prefs.getBool('historyEnabled') ?? true;
+  Future<void> setHistoryEnabled(bool v) => _prefs.setBool('historyEnabled', v);
+
+  bool get clipboardOffer => _prefs.getBool('clipboardOffer') ?? true;
+  Future<void> setClipboardOffer(bool v) => _prefs.setBool('clipboardOffer', v);
 
   String? get cachedManifest => _prefs.getString('manifest');
   Future<void> setCachedManifest(String v) => _prefs.setString('manifest', v);

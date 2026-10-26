@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'app.dart';
 
@@ -14,9 +13,5 @@ void main() {
         'The language models are published by Mozilla (Firefox Translations) and are licensed under the '
         'Mozilla Public License 2.0. https://github.com/mozilla/firefox-translations-models');
   });
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.dark,
-  ));
   runApp(const VertoApp());
 }

@@ -61,4 +61,56 @@ class S {
   static const String updateNow = 'Update now';
   static const String updateKeepsData = 'Your history, settings and languages are kept.';
   static const String about = 'About and licenses';
+
+  static const String navHistory = 'History';
+
+  // Result actions
+  static const String favorite = 'Save to favourites';
+  static const String unfavorite = 'Remove from favourites';
+  static const String speak = 'Read aloud';
+  static const String stopSpeaking = 'Stop';
+  static const String bigText = 'Show in big text';
+  static const String paste = 'Paste';
+  static const String romanToggle = 'Roman';
+  static const String romanOn = 'Showing Roman letters (Hinglish)';
+
+  // Clipboard
+  static const String clipboardTitle = 'Translate copied text?';
+  static const String clipboardAction = 'Translate';
+  static const String clipboardDismiss = 'Not now';
+
+  // Language picker and list
+  static const String searchLanguages = 'Search languages';
+  static const String noMatch = 'No language found';
+  static const String sectionInstalled = 'Installed';
+  static const String sectionAvailable = 'Available to download';
+
+  // History
+  static const String historyTitle = 'History';
+  static const String searchHistory = 'Search history';
+  static const String all = 'All';
+  static const String favourites = 'Favourites';
+  static const String historyEmpty = 'Nothing here yet';
+  static const String favouritesEmpty = 'Tap the star on a translation to keep it here';
+  static const String saveHistory = 'Save history on this phone';
+  static const String saveHistoryHint = 'Stored only on this phone. Favourites are kept even when this is off.';
+  static const String clearHistory = 'Clear history';
+  static const String clearEverything = 'Clear everything, including favourites';
+  static const String clearHistoryBody = 'All saved translations are deleted, except favourites.';
+  static const String clearEverythingBody = 'All saved translations and favourites are deleted.';
+  static const String delete = 'Delete';
+  static String downloadFirst(String name) => 'Download  first';
+
+  // Storage and settings
+  static const String storageTitle = 'Storage';
+  static String packsUsed(String size, int count) => 'Language packs:  ()';
+  static const String removeAll = 'Remove all';
+  static const String removeAllTitle = 'Remove all language packs?';
+  static const String removeAllBody =
+      'All downloaded languages are deleted from this phone. Your history and settings stay.';
+  static String updateFiles(String size) => 'Downloaded update files: ';
+  static const String clear = 'Clear';
+  static const String settingsTitle = 'Settings';
+  static const String clipboardSetting = 'Offer to translate copied text';
+  static const String clipboardSettingHint = 'Checked only when you open Verto. Nothing is sent anywhere.';
 }

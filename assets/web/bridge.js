@@ -13,6 +13,7 @@ const post = (obj) => {
 const state = { packs: {}, translator: null, Backing: null, Batch: null };
 const cache = new Map();
 let safety = null;
+let romanize = () => null;
 
 function makeBacking(TranslatorBacking) {
   // NOTE: the base constructor may call these methods, so never rely on
@@ -94,6 +95,9 @@ const handlers = {
   async check({ from, to, text }) {
     return safety.check(from, to, text);
   },
+  async romanize({ text, lang }) {
+    return { text: romanize(text, lang) };
+  },
   async gloss({ from, to, word }) {
     return { gloss: await safety.gloss(from, to, word) };
   },
@@ -119,6 +123,7 @@ window.vertoCall = async (id, method, argsJson) => {
     state.Backing = mod.TranslatorBacking;
     state.Batch = mod.BatchTranslator;
     const { createSafety } = await import('./safety.js');
+    ({ romanize } = await import('./translit.js'));
     safety = createSafety(rawTranslate);
     post({ t: 'ready' });
   } catch (e) {

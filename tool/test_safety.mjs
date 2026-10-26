@@ -1,5 +1,6 @@
 // Run with: node tool/test_safety.mjs
 import assert from 'node:assert/strict';
+import { romanize } from '../assets/web/translit.js';
 import { splitSentences, clauses, candidates, glossCovered, norm, createSafety } from '../assets/web/safety.js';
 
 // 1. sentence splitting keeps decimals together
@@ -68,5 +69,20 @@ const zh = createSafety(async (f, to, x) => x);
 const rz = await zh.translateText('en', 'zh-Hans', 'Hello. World.');
 assert.equal(rz, 'Hello.World.');
 assert.ok(candidates('我喜欢北京的天气', 'zh-Hans').length >= 2);
+
+// 12. Hinglish (Roman Hindi)
+const cases = {
+  'कैसे हो आप': 'kaise ho aap',
+  'मेरा नाम आदित्य है': 'mera naam aaditya hai',
+  'नमस्ते': 'namaste',
+  'मैं ठीक हूँ': 'main theek hoon',
+  'यह कमरा बहुत अच्छा है': 'yah kamra bahut achchha hai',
+  'आप क्या कर रहे हैं?': 'aap kya kar rahe hain?',
+  'समझता': 'samajhta',
+  'वह बाज़ार में है।': 'vah baazaar mein hai.',
+};
+for (const [hi, roman] of Object.entries(cases)) assert.equal(romanize(hi, 'hi'), roman, hi);
+assert.equal(romanize('hello', 'fr'), null);
+assert.equal(romanize('hello, मित्र 2', 'hi'), 'hello, mitra 2');
 
 console.log('safety.js: all tests passed');

@@ -1,0 +1,24 @@
+name: CI
+
+# Runs on every push to main and on pull requests: checks the code, builds nothing.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+      - name: Word safety net tests (JS)
+        run: node tool/test_safety.mjs
+      - run: flutter analyze
+      - run: flutter test

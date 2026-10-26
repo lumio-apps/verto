@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import 'engine.dart';
+import 'history.dart';
 import 'languages.dart';
 import 'pack_controller.dart';
 import 'settings_store.dart';
@@ -15,9 +16,9 @@ class TranslationController extends ChangeNotifier {
     required this.engine,
     required this.packs,
     required this.settings,
+    required this.history,
   }) {
     toEnglish = settings.toEnglish;
-    history = settings.history;
     foreign = settings.foreign;
     packs.addListener(_packsChanged);
     _fixForeign();
@@ -26,6 +27,7 @@ class TranslationController extends ChangeNotifier {
   final Engine engine;
   final PackController packs;
   final SettingsStore settings;
+  final HistoryController history;
 
   String? foreign;
   bool toEnglish = false;
@@ -36,7 +38,10 @@ class TranslationController extends ChangeNotifier {
   CheckPhase phase = CheckPhase.idle;
   CheckResult? check;
   List<MissingWord> missing = <MissingWord>[];
-  List<String> history = <String>[];
+
+  /// Roman ("Hinglish") spelling of a Hindi result, and whether it is shown.
+  String roman = '';
+  bool showRoman = false;
 
   int _seq = 0;
   Timer? _debounce;
@@ -48,6 +53,14 @@ class TranslationController extends ChangeNotifier {
 
   List<Language> get installedLanguages =>
       packs.languages.where((l) => packs.isInstalled(l.code)).toList();
+
+  bool get romanSupported => to.code == 'hi';
+
+  /// What the result card shows: the translation, or its Roman spelling.
+  String get displayOutput => (showRoman && roman.isNotEmpty) ? roman : output;
+  bool get displayIsRtl => to.rtl && !(showRoman && roman.isNotEmpty);
+
+  bool get isFavorite => output.isNotEmpty && history.isFavorite(from.code, to.code, input.trim());
 
   String? _installedKey;
 
@@ -91,10 +104,24 @@ class TranslationController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void useHistory(String text) {
+  void loadText(String text) {
     input = text;
     _schedule(immediate: true);
     notifyListeners();
+  }
+
+  /// Open a saved translation. Returns false when its language is not installed.
+  bool openItem(SavedItem item) {
+    final code = item.from == 'en' ? item.to : item.from;
+    if (!packs.isInstalled(code)) return false;
+    foreign = code;
+    toEnglish = item.to == 'en';
+    unawaited(settings.setForeign(code));
+    unawaited(settings.setToEnglish(toEnglish));
+    input = item.source;
+    _schedule(immediate: true);
+    notifyListeners();
+    return true;
   }
 
   void clear() {
@@ -102,6 +129,7 @@ class TranslationController extends ChangeNotifier {
     _seq++;
     input = '';
     output = '';
+    roman = '';
     error = null;
     translating = false;
     phase = CheckPhase.idle;
@@ -110,11 +138,23 @@ class TranslationController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleRoman() {
+    showRoman = !showRoman;
+    notifyListeners();
+  }
+
+  void toggleFavorite() {
+    if (output.isEmpty) return;
+    history.toggleFavorite(from: from.code, to: to.code, source: input.trim(), target: output);
+    notifyListeners();
+  }
+
   void _schedule({bool immediate = false}) {
     _debounce?.cancel();
     if (input.trim().isEmpty || !hasLanguage) {
       _seq++;
       output = '';
+      roman = '';
       translating = false;
       phase = CheckPhase.idle;
       check = null;
@@ -122,6 +162,20 @@ class TranslationController extends ChangeNotifier {
       return;
     }
     _debounce = Timer(immediate ? Duration.zero : const Duration(milliseconds: 450), _run);
+  }
+
+  Future<void> _updateRoman(int seq) async {
+    if (!romanSupported || output.isEmpty) {
+      roman = '';
+      return;
+    }
+    try {
+      final r = await engine.romanize(text: output, lang: to.code);
+      if (seq != _seq) return;
+      roman = r ?? '';
+    } catch (_) {
+      roman = '';
+    }
   }
 
   Future<void> _run() async {
@@ -141,6 +195,8 @@ class TranslationController extends ChangeNotifier {
       output = out;
       translating = false;
       phase = CheckPhase.checking;
+      await _updateRoman(seq);
+      if (seq != _seq) return;
       notifyListeners();
       final result = await engine.check(from: f, to: t, text: text);
       if (seq != _seq) return;
@@ -149,7 +205,9 @@ class TranslationController extends ChangeNotifier {
         output = result.translated;
         missing = List<MissingWord>.of(result.missing);
         phase = CheckPhase.done;
-        await _remember(text);
+        await _updateRoman(seq);
+        if (seq != _seq) return;
+        history.add(from: f, to: t, source: text.trim(), target: output);
       } else {
         phase = CheckPhase.idle;
       }
@@ -158,6 +216,7 @@ class TranslationController extends ChangeNotifier {
       translating = false;
       phase = CheckPhase.idle;
       output = '';
+      roman = '';
       error = e is EngineException ? e.message : 'Translation failed. Please try again.';
     }
     notifyListeners();
@@ -168,19 +227,14 @@ class TranslationController extends ChangeNotifier {
     final glue = const <String>{'ja', 'zh', 'th'}.contains(to.code.split('-').first) ? '' : ' ';
     output = output.trimRight() + glue + w.gloss;
     missing = missing.where((m) => m.word != w.word).toList();
+    final seq = _seq;
+    unawaited(_updateRoman(seq).then((_) => notifyListeners()));
     notifyListeners();
   }
 
   void keepAsIs(MissingWord w) {
     missing = missing.where((m) => m.word != w.word).toList();
     notifyListeners();
-  }
-
-  Future<void> _remember(String text) async {
-    final t = text.trim();
-    if (t.isEmpty) return;
-    history = <String>[t, ...history.where((h) => h != t)].take(8).toList();
-    await settings.setHistory(history);
   }
 
   @override

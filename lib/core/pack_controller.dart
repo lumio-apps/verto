@@ -87,6 +87,18 @@ class PackController extends ChangeNotifier {
     return have != null && latest != null && latest.version > have.version;
   }
 
+  int get installedBytes => installed.values.fold<int>(0, (sum, p) => sum + p.size);
+
+  Future<void> removeAll() async {
+    for (final code in installed.keys.toList()) {
+      if (!isBusy(code)) await store.remove(code);
+    }
+    errors.clear();
+    installed = await store.readAll();
+    await onInstalledChanged(installed);
+    notifyListeners();
+  }
+
   bool get anyUpdate => installed.keys.any(hasUpdate);
 
   Future<void> refreshManifest() async {

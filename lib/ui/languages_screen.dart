@@ -7,45 +7,91 @@ import '../services.dart';
 import '../strings.dart';
 import '../theme.dart';
 
-class LanguagesScreen extends StatelessWidget {
+class LanguagesScreen extends StatefulWidget {
   const LanguagesScreen({super.key});
+
+  @override
+  State<LanguagesScreen> createState() => _LanguagesScreenState();
+}
+
+class _LanguagesScreenState extends State<LanguagesScreen> {
+  String _query = '';
+
+  bool _matches(Language l) {
+    final q = _query.trim().toLowerCase();
+    if (q.isEmpty) return true;
+    return l.name.toLowerCase().contains(q) ||
+        l.native.toLowerCase().contains(q) ||
+        l.code.toLowerCase().contains(q);
+  }
 
   @override
   Widget build(BuildContext context) {
     final services = AppScope.of(context);
     final packs = services.packs;
+    final c = context.vc;
     return ListenableBuilder(
       listenable: Listenable.merge(<Listenable>[packs, services.updates]),
       builder: (context, _) {
+        final all = packs.languages.where(_matches).toList();
+        final installed = all.where((l) => packs.isInstalled(l.code) || packs.isBusy(l.code)).toList();
+        final available = all.where((l) => !packs.isInstalled(l.code) && !packs.isBusy(l.code)).toList();
+        final showEnglish = _query.trim().isEmpty || 'english'.contains(_query.trim().toLowerCase());
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
           children: <Widget>[
-            const Text(S.languagesTitle, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: kDeep)),
+            Text(S.languagesTitle, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: c.heading)),
             const SizedBox(height: 14),
             _AppUpdateCard(service: services.updates),
+            const SizedBox(height: 12),
+            _StorageCard(packs: packs, updates: services.updates),
+            const SizedBox(height: 12),
+            const _SettingsCard(),
             const SizedBox(height: 20),
             Row(
               children: <Widget>[
-                const Expanded(
-                  child: Text(S.languagesIntro, style: TextStyle(color: kSecondary, height: 1.35)),
+                Expanded(
+                  child: Text(S.languagesIntro, style: TextStyle(color: c.secondary, height: 1.35)),
                 ),
                 IconButton(
                   tooltip: S.refreshList,
                   onPressed: packs.loadingManifest ? null : packs.refreshManifest,
                   icon: packs.loadingManifest
                       ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Icon(Icons.refresh_rounded, color: kPrimary),
+                      : Icon(Icons.refresh_rounded, color: c.accent),
                 ),
               ],
             ),
             if (packs.manifestError != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: Text(packs.manifestError!, style: const TextStyle(color: kAmberInk, fontSize: 13)),
+                child: Text(packs.manifestError!, style: TextStyle(color: c.amber, fontSize: 13)),
               ),
             const SizedBox(height: 4),
-            const _EnglishTile(),
-            for (final l in packs.languages) _LanguageTile(language: l, packs: packs),
+            TextField(
+              onChanged: (v) => setState(() => _query = v),
+              decoration: InputDecoration(
+                hintText: S.searchLanguages,
+                prefixIcon: const Icon(Icons.search_rounded),
+                filled: true,
+                fillColor: c.soft,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+              ),
+            ),
+            const SizedBox(height: 14),
+            if (showEnglish || installed.isNotEmpty) const _Section(S.sectionInstalled),
+            if (showEnglish) const _EnglishTile(),
+            for (final l in installed) _LanguageTile(language: l, packs: packs),
+            if (available.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 6),
+              const _Section(S.sectionAvailable),
+              for (final l in available) _LanguageTile(language: l, packs: packs),
+            ],
+            if (!showEnglish && all.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 30),
+                child: Center(child: Text(S.noMatch, style: TextStyle(color: c.secondary))),
+              ),
             const SizedBox(height: 16),
             Center(
               child: TextButton(
@@ -64,34 +110,55 @@ class LanguagesScreen extends StatelessWidget {
   }
 }
 
-BoxDecoration _cardDecoration() => BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      border: Border.all(color: kBorder),
+BoxDecoration _cardDecoration(BuildContext context) {
+  final c = context.vc;
+  return BoxDecoration(
+    color: c.card,
+    borderRadius: BorderRadius.circular(18),
+    border: Border.all(color: c.border),
+  );
+}
+
+class _Section extends StatelessWidget {
+  const _Section(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: context.vc.secondary),
+      ),
     );
+  }
+}
 
 class _EnglishTile extends StatelessWidget {
   const _EnglishTile();
 
   @override
   Widget build(BuildContext context) {
+    final c = context.vc;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: _cardDecoration(),
-      child: const Row(
+      decoration: _cardDecoration(context),
+      child: Row(
         children: <Widget>[
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text('English', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                SizedBox(height: 2),
-                Text(S.englishBuiltIn, style: TextStyle(color: kSecondary, fontSize: 13)),
+                const Text('English', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text(S.englishBuiltIn, style: TextStyle(color: c.secondary, fontSize: 13)),
               ],
             ),
           ),
-          Icon(Icons.check_circle_rounded, color: kPrimary),
+          Icon(Icons.check_circle_rounded, color: c.accent),
         ],
       ),
     );
@@ -106,12 +173,14 @@ class _LanguageTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.vc;
     final code = language.code;
     final info = packs.info(code);
     final installed = packs.installed[code];
     final busy = packs.isBusy(code);
     final hasUpdate = packs.hasUpdate(code);
     final error = packs.errors[code];
+    final native = language.native.isEmpty ? '' : '${language.native} · ';
 
     String subtitle;
     if (busy) {
@@ -119,9 +188,9 @@ class _LanguageTile extends StatelessWidget {
     } else if (installed != null) {
       subtitle = hasUpdate
           ? '${S.updateAvailable} · ${formatBytes(info!.size)}'
-          : '${S.installed} · ${formatBytes(installed.size)}';
+          : '$native${S.installed} · ${formatBytes(installed.size)}';
     } else if (info != null) {
-      subtitle = '${language.native} · ${formatBytes(info.size)}';
+      subtitle = '$native${formatBytes(info.size)}';
     } else {
       subtitle = language.native;
     }
@@ -134,7 +203,7 @@ class _LanguageTile extends StatelessWidget {
     } else if (installed != null) {
       trailing = IconButton(
         tooltip: S.remove,
-        icon: const Icon(Icons.delete_outline_rounded, color: kSecondary),
+        icon: Icon(Icons.delete_outline_rounded, color: c.secondary),
         onPressed: () => _confirmRemove(context),
       );
     } else if (info != null) {
@@ -146,7 +215,7 @@ class _LanguageTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: _cardDecoration(),
+      decoration: _cardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -158,7 +227,7 @@ class _LanguageTile extends StatelessWidget {
                   children: <Widget>[
                     Text(language.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 2),
-                    Text(subtitle, style: const TextStyle(color: kSecondary, fontSize: 13)),
+                    Text(subtitle, style: TextStyle(color: c.secondary, fontSize: 13)),
                   ],
                 ),
               ),
@@ -172,7 +241,7 @@ class _LanguageTile extends StatelessWidget {
           ],
           if (error != null) ...<Widget>[
             const SizedBox(height: 8),
-            Text(error, style: const TextStyle(color: kErrorInk, fontSize: 13)),
+            Text(error, style: TextStyle(color: c.danger, fontSize: 13)),
           ],
         ],
       ),
@@ -202,10 +271,128 @@ class _Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.vc;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(color: kSoft, borderRadius: BorderRadius.circular(20)),
-      child: Text(text, style: const TextStyle(color: kDeep, fontSize: 12, fontWeight: FontWeight.w600)),
+      decoration: BoxDecoration(color: c.soft, borderRadius: BorderRadius.circular(20)),
+      child: Text(text, style: TextStyle(color: c.heading, fontSize: 12, fontWeight: FontWeight.w600)),
+    );
+  }
+}
+
+class _StorageCard extends StatefulWidget {
+  const _StorageCard({required this.packs, required this.updates});
+
+  final PackController packs;
+  final UpdateService updates;
+
+  @override
+  State<_StorageCard> createState() => _StorageCardState();
+}
+
+class _StorageCardState extends State<_StorageCard> {
+  int _updateBytes = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSize();
+  }
+
+  Future<void> _loadSize() async {
+    final n = await widget.updates.downloadsSize();
+    if (mounted) setState(() => _updateBytes = n);
+  }
+
+  Future<void> _removeAll() async {
+    final yes = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text(S.removeAllTitle),
+        content: const Text(S.removeAllBody),
+        actions: <Widget>[
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text(S.cancel)),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text(S.remove)),
+        ],
+      ),
+    );
+    if (yes == true) await widget.packs.removeAll();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.vc;
+    final packs = widget.packs;
+    final count = packs.installed.length;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: _cardDecoration(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(S.storageTitle, style: TextStyle(fontSize: 13, color: c.secondary, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 8),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  count == 0 ? 'No language packs downloaded' : S.packsUsed(formatBytes(packs.installedBytes), count),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+              if (count > 0) TextButton(onPressed: _removeAll, child: const Text(S.removeAll)),
+            ],
+          ),
+          if (_updateBytes > 0)
+            Row(
+              children: <Widget>[
+                Expanded(child: Text(S.updateFiles(formatBytes(_updateBytes)), style: TextStyle(color: c.secondary))),
+                TextButton(
+                  onPressed: () async {
+                    await widget.updates.clearDownloads();
+                    await _loadSize();
+                  },
+                  child: const Text(S.clear),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsCard extends StatefulWidget {
+  const _SettingsCard();
+
+  @override
+  State<_SettingsCard> createState() => _SettingsCardState();
+}
+
+class _SettingsCardState extends State<_SettingsCard> {
+  @override
+  Widget build(BuildContext context) {
+    final settings = AppScope.of(context).settings;
+    final c = context.vc;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
+      decoration: _cardDecoration(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(S.settingsTitle, style: TextStyle(fontSize: 13, color: c.secondary, fontWeight: FontWeight.w700)),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text(S.clipboardSetting),
+            subtitle: const Text(S.clipboardSettingHint),
+            value: settings.clipboardOffer,
+            onChanged: (v) async {
+              await settings.setClipboardOffer(v);
+              if (mounted) setState(() {});
+            },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -217,6 +404,7 @@ class _AppUpdateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.vc;
     final release = service.latest;
     String status;
     if (service.checking) {
@@ -243,7 +431,7 @@ class _AppUpdateCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: kSoft, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(color: c.soft, borderRadius: BorderRadius.circular(20)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -253,13 +441,13 @@ class _AppUpdateCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    const Text(S.appUpdateTitle, style: TextStyle(fontSize: 13, color: kSecondary, fontWeight: FontWeight.w600)),
+                    Text(S.appUpdateTitle, style: TextStyle(fontSize: 13, color: c.secondary, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 2),
-                    Text(status, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: kDeep)),
+                    Text(status, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: c.heading)),
                     if (service.updateAvailable)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 2),
-                        child: Text(S.updateKeepsData, style: TextStyle(fontSize: 12.5, color: kSecondary)),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(S.updateKeepsData, style: TextStyle(fontSize: 12.5, color: c.secondary)),
                       ),
                   ],
                 ),
@@ -274,7 +462,7 @@ class _AppUpdateCard extends StatelessWidget {
           ],
           if (service.error != null) ...<Widget>[
             const SizedBox(height: 8),
-            Text(service.error!, style: const TextStyle(color: kErrorInk, fontSize: 13)),
+            Text(service.error!, style: TextStyle(color: c.danger, fontSize: 13)),
           ],
         ],
       ),

@@ -36,32 +36,33 @@ class WordSheetBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.vc;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text(S.wordSheetTitle, style: TextStyle(fontSize: 13, color: kSecondary, fontWeight: FontWeight.w600)),
+          Text(S.wordSheetTitle, style: TextStyle(fontSize: 13, color: c.secondary, fontWeight: FontWeight.w600)),
           const SizedBox(height: 10),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(color: kAmberBg, borderRadius: BorderRadius.circular(10)),
-            child: Text(word.word, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: kAmberInk)),
+            decoration: BoxDecoration(color: c.amberBg, borderRadius: BorderRadius.circular(10)),
+            child: Text(word.word, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: c.amberInk)),
           ),
           const SizedBox(height: 14),
-          const Text(S.wordSheetBody, style: TextStyle(color: kSecondary)),
+          Text(S.wordSheetBody, style: TextStyle(color: c.secondary)),
           const SizedBox(height: 14),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: kSoft, borderRadius: BorderRadius.circular(14)),
+            decoration: BoxDecoration(color: c.soft, borderRadius: BorderRadius.circular(14)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(word.gloss, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: kDeep)),
+                Text(word.gloss, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: c.heading)),
                 const SizedBox(height: 4),
-                const Text(S.wordSheetSource, style: TextStyle(fontSize: 12, color: kSecondary)),
+                Text(S.wordSheetSource, style: TextStyle(fontSize: 12, color: c.secondary)),
               ],
             ),
           ),
