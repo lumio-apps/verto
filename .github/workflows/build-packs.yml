@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       languages:
-        description: 'Language codes separated by spaces. Leave empty for all (hi es fr de ru ja ar fa).'
+        description: 'Language codes separated by spaces. Leave empty for ALL languages Mozilla offers.'
         required: false
         default: ''
 

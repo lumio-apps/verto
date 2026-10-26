@@ -12,11 +12,17 @@ class InstalledPack {
     required this.version,
     required this.size,
     required this.files,
+    this.name,
+    this.native,
+    this.rtl = false,
   });
 
   final String code;
   final int version;
   final int size;
+  final String? name;
+  final String? native;
+  final bool rtl;
 
   /// Paths inside the pack folder, e.g. "hi-en/model.bin".
   final List<String> files;
@@ -26,6 +32,9 @@ class InstalledPack {
         version: (j['version'] as num).toInt(),
         size: (j['size'] as num).toInt(),
         files: (j['files'] as List<dynamic>).cast<String>(),
+        name: j['name'] as String?,
+        native: j['native'] as String?,
+        rtl: (j['rtl'] as bool?) ?? false,
       );
 
   factory InstalledPack.fromInfo(PackInfo info) => InstalledPack(
@@ -33,11 +42,17 @@ class InstalledPack {
         version: info.version,
         size: info.size,
         files: info.files.map((f) => f.path).toList(),
+        name: info.name,
+        native: info.native,
+        rtl: info.rtl,
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'version': version,
         'size': size,
+        'name': name,
+        'native': native,
+        'rtl': rtl,
         'files': files,
       };
 }

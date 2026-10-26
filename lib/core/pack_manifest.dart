@@ -47,11 +47,23 @@ class PackFile {
 
 /// A downloadable language (both directions with English).
 class PackInfo {
-  const PackInfo({required this.code, required this.version, required this.files});
+  const PackInfo({
+    required this.code,
+    required this.version,
+    required this.files,
+    this.name,
+    this.native,
+    this.rtl = false,
+  });
 
   final String code;
   final int version;
   final List<PackFile> files;
+
+  /// Display names published with the pack (used for languages the app does not know by itself).
+  final String? name;
+  final String? native;
+  final bool rtl;
 
   int get size => files.fold<int>(0, (sum, f) => sum + f.size);
 
@@ -61,10 +73,16 @@ class PackInfo {
         files: (j['files'] as List<dynamic>)
             .map((e) => PackFile.fromJson(e as Map<String, dynamic>))
             .toList(),
+        name: j['name'] as String?,
+        native: j['native'] as String?,
+        rtl: (j['rtl'] as bool?) ?? false,
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'version': version,
+        'name': name,
+        'native': native,
+        'rtl': rtl,
         'files': files.map((f) => f.toJson()).toList(),
       };
 }

@@ -45,7 +45,6 @@ class S {
   static const String update = 'Update';
   static const String remove = 'Remove';
   static const String cancel = 'Cancel';
-  static const String comingSoon = 'Coming soon';
   static const String notPublished = 'Not available yet';
   static const String installed = 'Installed';
   static const String updateAvailable = 'Update available';
@@ -53,8 +52,6 @@ class S {
   static String removeTitle(String name) => 'Remove $name?';
   static const String removeBody =
       'The language pack is deleted from this phone. Your history and settings stay. You can download it again any time.';
-  static const String armenianNote =
-      'Armenian needs a model that is still being prepared.';
 
   static const String appUpdateTitle = 'App version';
   static const String checkForUpdate = 'Check for update';

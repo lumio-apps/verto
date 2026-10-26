@@ -63,4 +63,10 @@ assert.equal(t, 'ONE.\n\nTWO.');
 const jp = candidates('私は東京に行きます', 'ja');
 assert.ok(jp.length >= 2, 'segmenter should find words: ' + jp.join('|'));
 
+// 11. Chinese is written without spaces
+const zh = createSafety(async (f, to, x) => x);
+const rz = await zh.translateText('en', 'zh-Hans', 'Hello. World.');
+assert.equal(rz, 'Hello.World.');
+assert.ok(candidates('我喜欢北京的天气', 'zh-Hans').length >= 2);
+
 console.log('safety.js: all tests passed');

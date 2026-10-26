@@ -3,7 +3,7 @@ description: "Verto - private offline translator. English to and from nine langu
 publish_to: 'none'
 
 # Keep this line in sync with the git tag you push (tag v1.0.0 -> version: 1.0.0+1).
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.10.0

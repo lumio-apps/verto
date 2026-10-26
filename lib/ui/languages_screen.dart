@@ -45,7 +45,7 @@ class LanguagesScreen extends StatelessWidget {
               ),
             const SizedBox(height: 4),
             const _EnglishTile(),
-            for (final l in kForeignLanguages) _LanguageTile(language: l, packs: packs),
+            for (final l in packs.languages) _LanguageTile(language: l, packs: packs),
             const SizedBox(height: 16),
             Center(
               child: TextButton(
@@ -114,9 +114,7 @@ class _LanguageTile extends StatelessWidget {
     final error = packs.errors[code];
 
     String subtitle;
-    if (language.comingSoon) {
-      subtitle = S.armenianNote;
-    } else if (busy) {
+    if (busy) {
       subtitle = 'Downloading ${(packs.progress[code]! * 100).toStringAsFixed(0)}%';
     } else if (installed != null) {
       subtitle = hasUpdate
@@ -129,9 +127,7 @@ class _LanguageTile extends StatelessWidget {
     }
 
     Widget trailing;
-    if (language.comingSoon) {
-      trailing = const _Tag(S.comingSoon);
-    } else if (busy) {
+    if (busy) {
       trailing = TextButton(onPressed: () => packs.cancel(code), child: const Text(S.cancel));
     } else if (installed != null && hasUpdate) {
       trailing = FilledButton.tonal(onPressed: () => packs.install(code), child: const Text(S.update));

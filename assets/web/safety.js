@@ -19,7 +19,12 @@ const STOP_EN = new Set([
   'our', 'out', 'has', 'had', 'its', 'who', 'how', 'any', 'may', 'too', 'per', 'via',
 ]);
 
-export const joinerFor = (lang) => (lang === 'ja' ? '' : ' ');
+// Languages written without spaces between words.
+const NO_SPACE = new Set(['ja', 'zh', 'th']);
+const baseLang = (lang) => String(lang).split('-')[0];
+const isNoSpace = (lang) => NO_SPACE.has(baseLang(lang));
+
+export const joinerFor = (lang) => (isNoSpace(lang) ? '' : ' ');
 
 const segmenters = new Map();
 function segmenter(lang) {
@@ -96,8 +101,8 @@ export function clauses(sentence, lang, limit = 28) {
 
 function splitHalf(text, lang) {
   let tokens;
-  if (lang === 'ja') {
-    const seg = segmenter('ja');
+  if (isNoSpace(lang)) {
+    const seg = segmenter(lang);
     tokens = seg ? Array.from(seg.segment(text), (s) => s.segment) : Array.from(text);
   } else {
     tokens = text.split(/\s+/).filter(Boolean);
@@ -109,11 +114,12 @@ function splitHalf(text, lang) {
 
 function worthChecking(w, lang) {
   if (/\p{N}/u.test(w)) return true;
-  if (lang === 'ja') return !/^[぀-ゟ]{1,2}$/.test(w);
+  if (baseLang(lang) === 'ja') return !/^[぀-ゟ]{1,2}$/.test(w);
+  if (isNoSpace(lang)) return Array.from(w).length >= 2;
   const len = Array.from(w).length;
   const latinLike = /^[\p{Script=Latin}\p{Script=Cyrillic}'’-]+$/u.test(w);
   if (len < (latinLike ? 4 : 3)) return false;
-  if (lang === 'en' && STOP_EN.has(w.toLowerCase())) return false;
+  if (baseLang(lang) === 'en' && STOP_EN.has(w.toLowerCase())) return false;
   return true;
 }
 
@@ -131,13 +137,14 @@ export function candidates(sentence, lang) {
 }
 
 function keepGlossToken(t, lang) {
-  if (lang === 'ja') return !/^[぀-ゟ]$/.test(t);
-  if (lang === 'en') return t.length >= 3 && !STOP_EN.has(t);
+  if (baseLang(lang) === 'ja') return !/^[぀-ゟ]$/.test(t);
+  if (isNoSpace(lang)) return Array.from(t).length >= 2;
+  if (baseLang(lang) === 'en') return t.length >= 3 && !STOP_EN.has(t);
   return t.length >= 3;
 }
 
 function tokenHit(t, target, lang) {
-  if (lang === 'ja') return target.includes(t);
+  if (isNoSpace(lang)) return target.includes(t);
   const chars = Array.from(t);
   const stem = chars.length > 5 ? chars.slice(0, chars.length - 2).join('') : t;
   return target.includes(stem);

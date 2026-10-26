@@ -5,14 +5,12 @@ class Language {
     required this.name,
     required this.native,
     this.rtl = false,
-    this.comingSoon = false,
   });
 
   final String code;
   final String name;
   final String native;
   final bool rtl;
-  final bool comingSoon;
 }
 
 const Language kEnglish = Language(code: 'en', name: 'English', native: 'English');
@@ -27,7 +25,6 @@ const List<Language> kForeignLanguages = <Language>[
   Language(code: 'ja', name: 'Japanese', native: '日本語'),
   Language(code: 'ar', name: 'Arabic', native: 'العربية', rtl: true),
   Language(code: 'fa', name: 'Persian (Farsi)', native: 'فارسی', rtl: true),
-  Language(code: 'hy', name: 'Armenian', native: 'Հայերեն', comingSoon: true),
 ];
 
 Language? languageByCode(String code) {

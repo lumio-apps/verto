@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import 'config.dart';
 import 'downloader.dart';
+import 'languages.dart';
 import 'pack_manifest.dart';
 import 'pack_store.dart';
 import 'settings_store.dart';
@@ -46,6 +47,34 @@ class PackController extends ChangeNotifier {
     notifyListeners();
     await onInstalledChanged(installed);
     unawaited(refreshManifest());
+  }
+
+  /// Language details for a code: built-in table first, then what the pack list says.
+  Language? languageFor(String code) {
+    final known = languageByCode(code);
+    if (known != null) return known;
+    final info = manifest?.packs[code];
+    final have = installed[code];
+    final name = info?.name ?? have?.name;
+    if (info == null && have == null) return null;
+    return Language(
+      code: code,
+      name: name ?? code,
+      native: info?.native ?? have?.native ?? '',
+      rtl: info?.rtl ?? have?.rtl ?? false,
+    );
+  }
+
+  /// Every language to show: the built-in ones first, then any extra the pack list offers.
+  List<Language> get languages {
+    final out = List<Language>.of(kForeignLanguages);
+    final known = out.map((l) => l.code).toSet();
+    final extra = <String>{...?manifest?.packs.keys, ...installed.keys}..removeAll(known);
+    final more = <Language>[
+      for (final c in extra)
+        if (languageFor(c) != null) languageFor(c)!,
+    ]..sort((a, b) => a.name.compareTo(b.name));
+    return <Language>[...out, ...more];
   }
 
   bool isInstalled(String code) => installed.containsKey(code);

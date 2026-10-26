@@ -41,14 +41,13 @@ class TranslationController extends ChangeNotifier {
   int _seq = 0;
   Timer? _debounce;
 
-  Language? get foreignLanguage => foreign == null ? null : languageByCode(foreign!);
+  Language? get foreignLanguage => foreign == null ? null : packs.languageFor(foreign!);
   Language get from => toEnglish ? (foreignLanguage ?? kEnglish) : kEnglish;
   Language get to => toEnglish ? kEnglish : (foreignLanguage ?? kEnglish);
   bool get hasLanguage => foreign != null;
 
-  List<Language> get installedLanguages => kForeignLanguages
-      .where((l) => packs.isInstalled(l.code))
-      .toList();
+  List<Language> get installedLanguages =>
+      packs.languages.where((l) => packs.isInstalled(l.code)).toList();
 
   String? _installedKey;
 
@@ -166,7 +165,7 @@ class TranslationController extends ChangeNotifier {
 
   /// Put the word-by-word translation of a flagged word into the result.
   void addWord(MissingWord w) {
-    final glue = to.code == 'ja' ? '' : ' ';
+    final glue = const <String>{'ja', 'zh', 'th'}.contains(to.code.split('-').first) ? '' : ' ';
     output = output.trimRight() + glue + w.gloss;
     missing = missing.where((m) => m.word != w.word).toList();
     notifyListeners();

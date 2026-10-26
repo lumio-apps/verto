@@ -2,7 +2,7 @@
 
 Private, offline translator for Android. English is built in. Download any of the other languages once and translate to and from English with no internet. No account, no ads, no tracking.
 
-**Languages:** Hindi, Spanish, French, German, Russian, Japanese, Arabic, Persian. Armenian is planned (see [ROADMAP](ROADMAP.md)).
+**Languages:** every language Mozilla publishes with both directions to English (Hindi, Spanish, French, German, Russian, Japanese, Arabic, Persian and more). The pack builder finds them itself, and the app lists whatever the pack list contains. Armenian is not available (see [ROADMAP](ROADMAP.md)).
 One language pack gives both directions (English to X and X to English). X to Y without English is not offered.
 
 ## How it works
@@ -14,7 +14,7 @@ One language pack gives both directions (English to X and X to English). X to Y 
 
 ## Build and release
 
-1. `pubspec.yaml` `version:` must match the tag you push (tag `v1.0.0` needs `version: 1.0.0+1`).
+1. `pubspec.yaml` `version:` must match the tag you push (tag `v1.0.1` needs `version: 1.0.1+2`).
 2. Push the tag. `.github/workflows/release.yml` fetches the engine, runs analyze and tests, builds the APK, signs it and creates the release.
 
 Repository secrets needed by the release workflow:

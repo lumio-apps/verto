@@ -3,9 +3,10 @@
 
 Usage: python3 tool/build_packs.py OUT_DIR [lang ...]
 
-For each language this downloads the newest stable English<->language models from
-Mozilla Remote Settings, un-gzips them and writes flat release assets plus a
-manifest.json into OUT_DIR. Models are MPL-2.0 (Mozilla).
+With no language codes, every language that has a complete stable English->X and
+X->English model in Mozilla Remote Settings is built. Models are downloaded,
+un-gzipped and written as flat release assets plus a manifest.json into OUT_DIR.
+Models are MPL-2.0 (Mozilla).
 """
 import gzip
 import hashlib
@@ -17,7 +18,32 @@ import urllib.request
 
 ROOT = "https://firefox.settings.services.mozilla.com/v1/"
 RECORDS = ROOT + "buckets/main/collections/translations-models/records?_limit=2000"
-LANGS = ["hi", "es", "fr", "de", "ru", "ja", "ar", "fa"]  # Armenian is not in Mozilla's models
+# name, native name. Unknown codes fall back to the code itself.
+NAMES = {
+    "af": ("Afrikaans", "Afrikaans"), "ar": ("Arabic", "العربية"), "az": ("Azerbaijani", "Azərbaycanca"),
+    "be": ("Belarusian", "Беларуская"), "bg": ("Bulgarian", "Български"), "bn": ("Bengali", "বাংলা"),
+    "bs": ("Bosnian", "Bosanski"), "ca": ("Catalan", "Català"), "cs": ("Czech", "Čeština"),
+    "cy": ("Welsh", "Cymraeg"), "da": ("Danish", "Dansk"), "de": ("German", "Deutsch"),
+    "el": ("Greek", "Ελληνικά"), "es": ("Spanish", "Español"), "et": ("Estonian", "Eesti"),
+    "eu": ("Basque", "Euskara"), "fa": ("Persian (Farsi)", "فارسی"), "fi": ("Finnish", "Suomi"),
+    "fr": ("French", "Français"), "ga": ("Irish", "Gaeilge"), "gl": ("Galician", "Galego"),
+    "gu": ("Gujarati", "ગુજરાતી"), "he": ("Hebrew", "עברית"), "hi": ("Hindi", "हिन्दी"),
+    "hr": ("Croatian", "Hrvatski"), "hu": ("Hungarian", "Magyar"), "id": ("Indonesian", "Bahasa Indonesia"),
+    "is": ("Icelandic", "Íslenska"), "it": ("Italian", "Italiano"), "ja": ("Japanese", "日本語"),
+    "ka": ("Georgian", "ქართული"), "kn": ("Kannada", "ಕನ್ನಡ"), "ko": ("Korean", "한국어"),
+    "lt": ("Lithuanian", "Lietuvių"), "lv": ("Latvian", "Latviešu"), "mk": ("Macedonian", "Македонски"),
+    "mr": ("Marathi", "मराठी"), "ms": ("Malay", "Bahasa Melayu"), "mt": ("Maltese", "Malti"),
+    "nb": ("Norwegian Bokmål", "Norsk bokmål"), "nl": ("Dutch", "Nederlands"), "nn": ("Norwegian Nynorsk", "Norsk nynorsk"),
+    "pa": ("Punjabi", "ਪੰਜਾਬੀ"), "pl": ("Polish", "Polski"), "pt": ("Portuguese", "Português"),
+    "ro": ("Romanian", "Română"), "ru": ("Russian", "Русский"), "sk": ("Slovak", "Slovenčina"),
+    "sl": ("Slovenian", "Slovenščina"), "sq": ("Albanian", "Shqip"), "sr": ("Serbian", "Српски"),
+    "sv": ("Swedish", "Svenska"), "sw": ("Swahili", "Kiswahili"), "ta": ("Tamil", "தமிழ்"),
+    "te": ("Telugu", "తెలుగు"), "th": ("Thai", "ไทย"), "tr": ("Turkish", "Türkçe"),
+    "uk": ("Ukrainian", "Українська"), "ur": ("Urdu", "اردو"), "vi": ("Vietnamese", "Tiếng Việt"),
+    "zh": ("Chinese (Simplified)", "简体中文"), "zh-Hans": ("Chinese (Simplified)", "简体中文"),
+    "zh-Hant": ("Chinese (Traditional)", "繁體中文"),
+}
+RTL = {"ar", "fa", "he", "ur"}
 ROLE_FILE = {
     "model": "model.bin",
     "lex": "lex.bin",
@@ -88,12 +114,19 @@ def sha256(b):
 
 def main():
     out = sys.argv[1] if len(sys.argv) > 1 else "out"
-    wanted = sys.argv[2:] or LANGS
     os.makedirs(out, exist_ok=True)
 
     base_url = json.loads(get(ROOT)[0])["capabilities"]["attachments"]["base_url"]
     records = load_records()
     print(f"{len(records)} model records")
+
+    wanted = sys.argv[2:]
+    if not wanted:
+        # every X that has stable models in BOTH directions with English
+        pairs = {(r.get("fromLang"), r.get("toLang")) for r in records}
+        candidates = sorted({a if b == "en" else b for a, b in pairs if "en" in (a, b) and a != b})
+        wanted = [c for c in candidates if pick(records, "en", c) and pick(records, c, "en")]
+        print("Languages found:", " ".join(wanted))
 
     previous = {}
     repo = os.environ.get("GITHUB_REPOSITORY")
@@ -142,7 +175,14 @@ def main():
         same = old is not None and sorted((f["path"], f["sha256"]) for f in old["files"]) == \
             sorted((f["path"], f["sha256"]) for f in files)
         version = old["version"] if same else (old["version"] + 1 if old else 1)
-        packs[code] = {"version": version, "files": files}
+        name, native = NAMES.get(code, (code, ""))
+        packs[code] = {
+            "version": version,
+            "name": name,
+            "native": native,
+            "rtl": code.split("-")[0] in RTL,
+            "files": files,
+        }
         built += 1
 
     if built == 0:
