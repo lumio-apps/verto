@@ -53,7 +53,9 @@ A translator for Android that never sends your text anywhere.
 
 One pack gives both directions: English to X and X to English. Going straight from X to Y, without English, is not offered.
 
-Verto offers every language that [Mozilla's Firefox Translations](https://github.com/mozilla/firefox-translations-models) publishes with both directions to English, for example Hindi, Spanish, French, German, Russian, Japanese, Arabic and Persian. The pack builder finds them by itself. The exact list is in `manifest.json` on the `packs` release.
+Verto offers every language that [Mozilla's Firefox Translations](https://github.com/mozilla/translations) publishes in both directions with English: more than 40, among them Hindi, Bengali, Gujarati, Kannada, Malayalam, Tamil, Telugu, Spanish, French, German, Russian, Ukrainian, Turkish, Japanese, Korean, Chinese, Arabic, Hebrew and Persian. The pack builder finds them by itself; the exact list is in `manifest.json` on the `packs` release.
+
+Languages whose model Mozilla still calls beta are marked **Beta** in the app. When Mozilla offers several model sizes, the builder picks the better-quality one that is meant for phones.
 
 Armenian is not available yet, see the [roadmap](ROADMAP.md).
 
@@ -75,7 +77,7 @@ This is a best-effort check, not a guarantee.
 
 ## Build and release
 
-1. Keep `pubspec.yaml` `version:` in sync with the tag you push (tag `v1.1.1` needs `version: 1.1.1+4`).
+1. Keep `pubspec.yaml` `version:` in sync with the tag you push (tag `v1.2.0` needs `version: 1.2.0+5`).
 2. Push the tag. `.github/workflows/release.yml` fetches the engine, runs analyze and tests, builds the APK, signs it and creates the release.
 
 Repository secrets used by the release workflow:
@@ -87,7 +89,7 @@ Repository secrets used by the release workflow:
 | `KEY_ALIAS` | key alias |
 | `KEY_PASSWORD` | key password |
 
-**Language packs:** Actions, then **Build language packs**, then Run workflow. Run it before the first release so the app has something to download. Run it again later to pick up new or improved models; pack versions are bumped automatically.
+**Language packs:** Actions, then **Build language packs**, then Run workflow. Run it before the first release so the app has something to download. Run it again later to pick up new or improved models; pack versions are bumped automatically. The run summary shows a table of every pack and the model it uses. Untick *Also use beta models* to publish release models only.
 
 **CI:** `.github/workflows/ci.yml` runs analyze and tests on every push to `main` and on pull requests.
 

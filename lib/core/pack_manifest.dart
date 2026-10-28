@@ -54,6 +54,7 @@ class PackInfo {
     this.name,
     this.native,
     this.rtl = false,
+    this.beta = false,
   });
 
   final String code;
@@ -64,6 +65,9 @@ class PackInfo {
   final String? name;
   final String? native;
   final bool rtl;
+
+  /// Built from a model Mozilla still marks as beta.
+  final bool beta;
 
   int get size => files.fold<int>(0, (sum, f) => sum + f.size);
 
@@ -76,6 +80,7 @@ class PackInfo {
         name: j['name'] as String?,
         native: j['native'] as String?,
         rtl: (j['rtl'] as bool?) ?? false,
+        beta: (j['beta'] as bool?) ?? false,
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{

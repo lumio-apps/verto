@@ -1,5 +1,7 @@
 # Roadmap
 
+Done in v1.2.0: 40+ languages from Mozilla's current model list, Beta label.
+
 Done in v1.1.0 (v1.1.1 fixes the storage texts): dark theme, history and favourites, read aloud, big text, clipboard offer, storage screen, Hinglish output, searchable language lists.
 
 ## Next (planned for v1.2.0)
@@ -25,6 +27,6 @@ Done in v1.1.0 (v1.1.1 fixes the storage texts): dark theme, history and favouri
 
 ## Parked or hard
 
-- **Armenian.** Mozilla does not publish Armenian models. Idea: ask Mozilla to add it, or convert the OPUS-MT models. OPUS-MT has English-Armenian (BLEU 16.6) and Armenian-English (BLEU 29.5), Apache-2.0, but they must be converted to the Bergamot format first. Once packs exist, add them to the pack list (the app shows any language the list contains).
+- **Armenian.** Mozilla did not publish Armenian models (checked October 2026; the pack builder will add it automatically if they do). Idea: ask Mozilla to add it, or convert the OPUS-MT models. OPUS-MT has English-Armenian (BLEU 16.6) and Armenian-English (BLEU 29.5), Apache-2.0, but they must be converted to the Bergamot format first. Once packs exist, add them to the pack list (the app shows any language the list contains).
 - Camera / image text translation: the easy engines are Google's (against the privacy goal), Tesseract is heavy.
 - Speech to text: the phone's recogniser usually talks to Google servers.

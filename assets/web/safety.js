@@ -20,7 +20,7 @@ const STOP_EN = new Set([
 ]);
 
 // Languages written without spaces between words.
-const NO_SPACE = new Set(['ja', 'zh', 'th']);
+const NO_SPACE = new Set(['ja', 'zh', 'th', 'lo', 'km', 'my']);
 const baseLang = (lang) => String(lang).split('-')[0];
 const isNoSpace = (lang) => NO_SPACE.has(baseLang(lang));
 

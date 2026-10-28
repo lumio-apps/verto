@@ -47,6 +47,7 @@ class S {
   static const String cancel = 'Cancel';
   static const String notPublished = 'Not available yet';
   static const String installed = 'Installed';
+  static const String beta = 'Beta';
   static const String updateAvailable = 'Update available';
   static const String refreshList = 'Refresh list';
   static String removeTitle(String name) => 'Remove $name?';

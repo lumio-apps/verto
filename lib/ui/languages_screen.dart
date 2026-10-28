@@ -181,6 +181,7 @@ class _LanguageTile extends StatelessWidget {
     final hasUpdate = packs.hasUpdate(code);
     final error = packs.errors[code];
     final native = language.native.isEmpty ? '' : '\u2068${language.native}\u2069 · ';
+    final beta = (info?.beta ?? false) ? ' · ${S.beta}' : '';
 
     String subtitle;
     if (busy) {
@@ -188,9 +189,9 @@ class _LanguageTile extends StatelessWidget {
     } else if (installed != null) {
       subtitle = hasUpdate
           ? '${S.updateAvailable} · ${formatBytes(info!.size)}'
-          : '$native${S.installed} · ${formatBytes(installed.size)}';
+          : '$native${S.installed} · ${formatBytes(installed.size)}$beta';
     } else if (info != null) {
-      subtitle = '$native${formatBytes(info.size)}';
+      subtitle = '$native${formatBytes(info.size)}$beta';
     } else {
       subtitle = language.native;
     }

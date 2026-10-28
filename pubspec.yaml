@@ -2,8 +2,8 @@ name: verto
 description: "Verto - private offline translator. English to and from nine languages."
 publish_to: 'none'
 
-# Keep this line in sync with the git tag you push (tag v1.1.1 -> version: 1.1.1+4).
-version: 1.1.1+4
+# Keep this line in sync with the git tag you push (tag v1.2.0 -> version: 1.2.0+5).
+version: 1.2.0+5
 
 environment:
   sdk: ^3.10.0
